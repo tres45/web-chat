@@ -1,0 +1,12 @@
+
+<div class="form-control">
+  <label for="msg">Send message</label>
+  <input id="msg" type="text" [(ngModel)]="message" placeholder="Enter message">
+
+  <button type="button" class="btn btn-primary" (click)="sendMessage()">Send</button>
+  <button type="button" class="btn btn-primary" (click)="sendMessageToAll()">To all</button>
+<div>
+
+<div *ngFor="let message of messageList">
+    {{message}}
+</div>

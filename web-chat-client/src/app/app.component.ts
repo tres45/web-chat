@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { ChatService } from './chat.service';
+import { ChatService } from './shared/services/chat.service';
 
 @Component({
   selector: 'app-root',

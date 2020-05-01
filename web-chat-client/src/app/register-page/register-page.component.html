@@ -1,0 +1,57 @@
+<form class="card" [formGroup]="formRegister" (ngSubmit)="submit()">
+  <h2>Register web chat account</h2>
+
+  <div class="alert alert-danger" *ngIf="auth.error$ | async as curError">
+    {{curError}}
+  </div>
+
+  <div
+    class="form-control"
+    [ngClass]="{invalid: formRegister.get('email').touched && formRegister.get('email').invalid}"
+  >
+    <label for="email">Email</label>
+    <input id="email" type="email" formControlName="email">
+
+    <div
+      class="validation"
+      *ngIf="formRegister.get('email').touched && formRegister.get('email').invalid"
+    >
+      <small *ngIf="formRegister.get('email').errors.required">
+        Enter email address.
+      </small>
+      <small *ngIf="formRegister.get('email').errors.email">
+        Email should be valid.
+      </small>
+    </div>
+  </div>
+
+  <div
+    class="form-control"
+    [ngClass]="{invalid: formRegister.get('password').touched && formRegister.get('password').invalid}"
+  >
+    <label for="password">Password</label>
+    <input id="password" type="password" formControlName="password">
+
+    <div
+      class="validation"
+      *ngIf="formRegister.get('password').touched && formRegister.get('password').invalid"
+    >
+      <small *ngIf="formRegister.get('password').errors.required">
+        Enter password.
+      </small>
+      <small *ngIf="formRegister.get('password').errors.minlength">
+        Password length should be more then 6.
+      </small>
+    </div>
+  </div>
+
+  
+  <button
+    class="btn btn-primary"
+    type="submit"
+    [disabled]="formRegister.invalid || submitted"
+  >Register</button>
+
+  <p class="message">Already have account? <a [routerLink]="['/login']">Login</a></p>
+
+</form>
