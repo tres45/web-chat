@@ -65,6 +65,10 @@ io.on('connection', function(socket) {
     addContact(data, socket);
   });
 
+  socket.on('add-group', (data) => {
+    addGroup(data, socket);
+  });
+
   socket.on('disconnect', function() {
     discconectBySocketId(socket.id);
   });
@@ -135,7 +139,7 @@ function discconectBySocketId(id) {
 
 function connectUser(userName, socket) {
   if (!(userName in Users)) {
-    createRoom(userName, userName, [userName]);
+    createRoom(userName, userName, [userName], false);
 
     if (Rooms['0'].userList.indexOf(userName) === -1) {
       Users[userName] = {};
@@ -156,7 +160,7 @@ function connectUser(userName, socket) {
   console.log('User', userName, 'connected');
 }
 
-function createRoom(roomId, roomName, userList) {
+function createRoom(roomId, roomName, userList, isGroup) {
   if (!roomId) {
     roomId = roomCounter++;
     roomId = roomId.toString();
@@ -168,7 +172,7 @@ function createRoom(roomId, roomName, userList) {
       name: roomName,
       userList: userList,
       messageList: [],
-      isGroup: (userList.length > 2),
+      isGroup: isGroup,
       roomId: roomId,
       unread: 0
     };
@@ -195,7 +199,7 @@ function addContact(data, socket) {
     if (data.userList[0] === data.userList[1]) {
       socket.emit('contact-not-found', false);
     } else if (data.userList[1] in Users) {
-      let newId = createRoom(null, data.name, data.userList);
+      let newId = createRoom(null, data.name, data.userList, false);
       data.roomId = newId;
       data.userList.forEach((user) => {
         Users[user].roomList.push(newId);
@@ -206,8 +210,18 @@ function addContact(data, socket) {
       socket.emit('contact-not-found', true);
     }
   }
+}
 
-  // TODO: emit added
+function addGroup(data, socket) {
+  if (data.isGroup) {
+    let newId = createRoom(null, data.name, data.userList, true);
+    data.roomId = newId;
+    data.userList.forEach((user) => {
+      Users[user].roomList.push(newId);
+
+      io.to(Users[user].socketId).emit('group-added', data);
+    });
+  }
 }
 
 webChatSocket.io = io;

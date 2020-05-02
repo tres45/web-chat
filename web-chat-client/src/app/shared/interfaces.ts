@@ -9,10 +9,6 @@ export interface FbAuthResponse {
   email: string;
 }
 
-export interface FbCreateResponse {
-  name: string;
-}
-
 export interface Message {
   fromUser: string;
   toRoom: string;

@@ -12,14 +12,14 @@
   border: 1px solid #2c3e50;
   overflow: hidden;
   max-width: 400px;
-  max-height: 220px;
+  max-height: 570px;
   display: block;
   padding: 1rem;
   background: #435f7a;
   margin-top: 3rem;
   position: fixed;
   left: 50%;
-  transform: translate(-50%, 25%);
+  transform: translate(-50%, 10%);
   z-index: 9999;
   color:  #f5f5f5;
 }
@@ -45,23 +45,24 @@
   .validation {
     color: var(--primary-color);
   }
+  margin-bottom: 20px;
 }
 
 .btn {
   margin-top: 30px;
   width: 50%;
-  left: 50%;
-  transform: translate(50%, 0%);
-  display: inline-block;
+  left: 25%;
   background: #2c3e50;
   color: #f5f5f5;
   padding: 0.4rem 1.3rem;
   font-size: 1rem;
   border: none;
   cursor: pointer;
-  margin-right: 0.5rem;
   transition: opacity 0.2s ease-in;
   outline: none;
+  position: absolute;
+  bottom: 0;
+  margin-bottom: 20px;
 
   &:disabled {
     cursor: not-allowed;
@@ -72,4 +73,13 @@
 
 .close {
   font-size: 2rem;
+}
+
+:host ::ng-deep .multiselect-dropdown input {
+  background: #f5f5f5;
+}
+
+:host ::ng-deep .multiselect-dropdown .dropdown-list {
+  background: #f5f5f5;
+  color: #2c3e50;
 }

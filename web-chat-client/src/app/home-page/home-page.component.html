@@ -42,14 +42,6 @@ Website: http://emilcarlsson.se/
     <hr style="border-color: #111111;">
     <div id="contacts" #scrollContacts>
       <ul>
-<!--        <li class="contact active">-->
-<!--          <div class="wrap">-->
-<!--            <div class="meta">-->
-<!--              <p class="name">Harvey Specter</p>-->
-<!--              <p class="unread">2</p>-->
-<!--            </div>-->
-<!--          </div>-->
-<!--        </li>-->
         <div *ngIf="roomList.length">
           <li *ngFor="let curRoom of roomList; let idx = index" class="contact"
             (click)="changeRoomIndex(roomIdx, idx)"
@@ -72,6 +64,7 @@ Website: http://emilcarlsson.se/
       <button id="addContact" (click)="modalContact = true"><span>Add contact</span></button>
       <button id="createGroup" (click)="modalGroup = true"><span>Create group</span></button>
       <app-add-contact *ngIf="modalContact" (contactAdded)="modalContact = false" ></app-add-contact>
+      <app-add-group *ngIf="modalGroup" (groupAdded)="modalGroup = false" ></app-add-group>
     </div>
 
   </div>

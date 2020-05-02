@@ -20,6 +20,7 @@ export class HomePageComponent implements OnInit, AfterViewChecked {
   roomIdx = -1;
   roomName = '';
   roomList: Room[] = [];
+  contactBook = {};
 
   modalContact = false;
   modalGroup = false;
@@ -59,6 +60,11 @@ export class HomePageComponent implements OnInit, AfterViewChecked {
     this.chatService.loadData()
       .subscribe((data: Room[]) => {
         data.forEach((curRum) => {
+          if (curRum.roomId !== '0') {
+            curRum.userList.forEach((name) => {
+              this.contactBook[name] = '';
+            });
+          }
           curRum.unread = 0;
           curRum.messageList.forEach((message) => {
             if (message.isUnread) {
@@ -73,6 +79,17 @@ export class HomePageComponent implements OnInit, AfterViewChecked {
     this.chatService.contactAdded()
       .subscribe((data: Room) => {
         console.log('contact added', data);
+        data.userList.forEach((name) => {
+          this.contactBook[name] = '';
+        });
+        data.unread = 0;
+        this.roomList.push(data);
+        this.scrollToBottom();
+      });
+
+    this.chatService.groupAdded()
+      .subscribe((data: Room) => {
+        console.log('group added', data);
         data.unread = 0;
         this.roomList.push(data);
         this.scrollToBottom();

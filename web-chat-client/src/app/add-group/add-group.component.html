@@ -1,0 +1,41 @@
+<div class="backdrop"></div>
+
+<div class="modal">
+  <button type="button" class="close" (click)="groupAdded.emit()">X</button>
+  <div class="m-header">
+    <h1>Create group chat</h1>
+  </div>
+  <div>
+    <form [formGroup]="formAddGroup" (ngSubmit)="submit()">
+      <div
+        class="add-form-control"
+        [ngClass]="{invalid: formAddGroup.get('groupName').touched && formAddGroup.get('groupName').invalid}"
+      >
+        <input id="groupName" type="text" formControlName="groupName" placeholder="Enter name">
+
+        <div
+          class="validation"
+          *ngIf="formAddGroup.get('groupName').touched && formAddGroup.get('groupName').invalid"
+        >
+          <small *ngIf="formAddGroup.get('groupName').errors.required">
+            Enter name for group.
+          </small>
+        </div>
+      </div>
+
+      <ng-multiselect-dropdown
+        [settings]="dropdownSettings"
+        [data]="dropdownList"
+        formControlName="groupMembers"
+        placeholder='Select members'
+      >
+      </ng-multiselect-dropdown>
+
+      <button
+        class="btn btn-primary"
+        type="submit"
+        [disabled]="formAddGroup.invalid || submitted"
+      >Create</button>
+    </form>
+  </div>
+</div>

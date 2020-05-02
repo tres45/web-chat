@@ -35,30 +35,26 @@ export class AddContactComponent implements OnInit {
   }
 
   notFoundError(): any {
-    this.formAddContact.controls['email'].setErrors({ 'emailNotFound': true });
+    this.formAddContact.controls.email.setErrors({
+      emailNotFound: true
+    });
   }
 
-  emeilExistError(): any {
-    this.formAddContact.controls['email'].setErrors({ 'emeilExist': true });
+  emailExistError() {
+    this.formAddContact.controls.email.setErrors({
+      emailExist: true
+    });
   }
 
   submit() {
+    this.isExist = false;
     if (this.formAddContact.invalid) {
       return;
     }
-
-    this.isExist = false;
-    for (let i = 1; i < this.account.roomList.length; i++) {
-      this.account.roomList[i].userList.forEach((name) => {
-        if (name === this.formAddContact.value.email) {
-          this.isExist = true;
-          this.emeilExistError();
-          return;
-        }
-      });
-      if (this.isExist) {
-        return;
-      }
+    if (this.formAddContact.value.email in this.account.contactBook) {
+      this.isExist = false;
+      this.emailExistError();
+      return;
     }
 
     this.submitted = true;

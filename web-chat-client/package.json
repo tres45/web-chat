@@ -21,6 +21,7 @@
     "@angular/platform-browser-dynamic": "~9.1.0",
     "@angular/router": "~9.1.0",
     "bootstrap": "^4.4.1",
+    "ng-multiselect-dropdown": "^0.2.10",
     "rxjs": "~6.5.4",
     "rxjs-compat": "^6.5.5",
     "socket.io-client": "^2.3.0",

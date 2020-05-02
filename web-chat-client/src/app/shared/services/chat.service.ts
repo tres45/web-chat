@@ -54,9 +54,21 @@ export class ChatService {
     this.socket.emit('add-contact', data);
   }
 
+  public addGroup(data) {
+    this.socket.emit('add-group', data);
+  }
+
   public contactAdded(): Observable<any> {
     return Observable.create((observer) => {
       this.socket.on('contact-added', (data) => {
+        observer.next(data);
+      });
+    });
+  }
+
+  public groupAdded(): Observable<any> {
+    return Observable.create((observer) => {
+      this.socket.on('group-added', (data) => {
         observer.next(data);
       });
     });
