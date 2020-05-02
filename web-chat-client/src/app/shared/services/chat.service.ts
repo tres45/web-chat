@@ -12,7 +12,7 @@ import { environment } from 'src/environments/environment';
 })
 export class ChatService {
 
-  private socket;
+  socket;
   user: string;
 
   constructor(private auth: AuthService) {
@@ -41,7 +41,6 @@ export class ChatService {
   public loadData(): Observable<any> {
     return Observable.create((observer) => {
       this.socket.on('load-data', (data) => {
-        console.log(data);
         observer.next(data);
       });
     });
@@ -49,6 +48,26 @@ export class ChatService {
 
   public changeRoom(room) {
     this.socket.emit('change-room', room);
+  }
+
+  public addContact(data) {
+    this.socket.emit('add-contact', data);
+  }
+
+  public contactAdded(): Observable<any> {
+    return Observable.create((observer) => {
+      this.socket.on('contact-added', (data) => {
+        observer.next(data);
+      });
+    });
+  }
+
+  public contactNotFound(): Observable<any> {
+    return Observable.create((observer) => {
+      this.socket.on('contact-not-found', (res) => {
+        observer.next(res);
+      });
+    });
   }
 
 }

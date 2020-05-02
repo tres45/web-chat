@@ -29,6 +29,7 @@ Rooms = {
     userList: name[];
     messageList: idx[];
     isGroup: boolean;
+    roomId: int;
   }
 }
 */
@@ -37,14 +38,15 @@ let Users = {};
 let MessageList = [];
 let Rooms = {
   '0': {
-      name: "General chat",
+      name: 'General chat',
       userList: [],
       messageList: [],
-      isGroup: true
+      isGroup: true,
+      roomId: '0'
   }
 };
 let roomCounter = Object.keys(Rooms).length;
-
+// TODO nickname
 io.on('connection', function(socket) {
 
   socket.on('new-connection', (userName) => {
@@ -59,6 +61,10 @@ io.on('connection', function(socket) {
     changeRoom(data, socket);
   });
 
+  socket.on('add-contact', (data) => {
+    addContact(data, socket);
+  });
+
   socket.on('disconnect', function() {
     discconectBySocketId(socket.id);
   });
@@ -68,7 +74,6 @@ io.on('connection', function(socket) {
 function newConnection(userName, socket) {
   connectUser(userName, socket);
   let data = [];
-
   Users[userName].roomList.forEach((roomId) => {
     let messageList = [];
     Rooms[roomId].messageList.forEach((idx) => {
@@ -79,16 +84,16 @@ function newConnection(userName, socket) {
 
     if ('ureadMessages' in Users[userName]) {
       let unreadList = Users[userName].ureadMessages;
-      if (unreadList.length > 0) {
-        unreadList.forEach((idx) => {
-          let addedIdx = room.messageList.indexOf(idx)
-          messageList[addedIdx].isUnread = true;
-          unreadList.splice(unreadList.indexOf('idx'), 1);
-        });
+      for (let i = 0; i < unreadList.length; i++) {
+        let idx = unreadList[i];
+        let addedIdx = Rooms[roomId].messageList.indexOf(idx);
+        if (addedIdx === -1) {
+          continue;
+        }
+        messageList[addedIdx].isUnread = true;
       }
     }
-
-    roomData = Object.assign({}, Rooms[roomId]);
+    let roomData = Object.assign({}, Rooms[roomId]);
     roomData.messageList = messageList;
     data.push(roomData);
   });
@@ -96,22 +101,23 @@ function newConnection(userName, socket) {
   socket.emit('load-data', data);
 }
 
-function newMessage(message, socket) { // TODO: unread if disconected
-  console.log("[new-message]:", message);
+function newMessage(message, socket) {
   message.id = MessageList.length;
   MessageList.push(message);
+  console.log('[new-message]:', message);
   Rooms[message.toRoom].messageList.push(message.id);
+
   socket.broadcast.to(message.toRoom).emit('new-message', message);
-}
 
-function discconectByName(name) {
-  Object.keys(Users).forEach((userName) => {
-    if (userName === name) {
-      Users[userName].socketId = -1;
-      Users[userName].connected = false;
-      console.log('User', userName, 'disconnected');
+  Rooms[message.toRoom].userList.forEach((userName) => {
+    if (userName !== message.fromUser) {
+      if (Users[userName].connected && Users[userName].currentRoom !== message.toRoom) {
+        Users[userName].ureadMessages.push(message.id);
 
-      return;
+        io.to(Users[userName].socketId).emit('new-message', message);
+      } else if (!Users[userName].connected) {
+        Users[userName].ureadMessages.push(message.id);
+      }
     }
   });
 }
@@ -121,8 +127,7 @@ function discconectBySocketId(id) {
     if (Users[userName].socketId === id) {
       Users[userName].socketId = -1;
       Users[userName].connected = false;
-      console.log('User', userName, 'disconnected');
-
+      Users[userName].currentRoom = '';
       return;
     }
   });
@@ -131,28 +136,30 @@ function discconectBySocketId(id) {
 function connectUser(userName, socket) {
   if (!(userName in Users)) {
     createRoom(userName, userName, [userName]);
+
     if (Rooms['0'].userList.indexOf(userName) === -1) {
       Users[userName] = {};
       Rooms['0'].userList.push(userName);
       Users[userName].roomList = ['0'];
       Users[userName].roomList.push(userName);
-      // TODO: push msg from group chat to user group chat
+      Users[userName].ureadMessages = [];
     }
   }
   else {
     socket.leave(Users[userName].currentRoom);
   }
-
   socket.join(userName);
-  Users[userName].currentRoom = userName;
+
+  Users[userName].currentRoom = '';
   Users[userName].socketId = socket.id;
   Users[userName].connected = true;
-  console.log("User", userName, "connected");
+  console.log('User', userName, 'connected');
 }
 
 function createRoom(roomId, roomName, userList) {
   if (!roomId) {
     roomId = roomCounter++;
+    roomId = roomId.toString();
   }
   if (roomId in Rooms) {
     return null;
@@ -161,10 +168,11 @@ function createRoom(roomId, roomName, userList) {
       name: roomName,
       userList: userList,
       messageList: [],
-      isGroup: (userList.length > 2)
+      isGroup: (userList.length > 2),
+      roomId: roomId,
+      unread: 0
     };
   }
-
   return roomId;
 }
 
@@ -172,6 +180,34 @@ function changeRoom(data, socket) {
   socket.leave(data.curRoom);
   socket.join(data.toRoom);
   Users[data.user].currentRoom = data.toRoom;
+
+  let unreadList = Users[data.user].ureadMessages;
+  for (let i = 0; i < Users[data.user].ureadMessages.length; i++) {
+    if (Rooms[data.toRoom].messageList.indexOf(unreadList[i]) !== -1) {
+      unreadList.splice(i, 1);
+      i--;
+    }
+  }
+}
+
+function addContact(data, socket) {
+  if (!data.isGroup) {
+    if (data.userList[0] === data.userList[1]) {
+      socket.emit('contact-not-found', false);
+    } else if (data.userList[1] in Users) {
+      let newId = createRoom(null, data.name, data.userList);
+      data.roomId = newId;
+      data.userList.forEach((user) => {
+        Users[user].roomList.push(newId);
+
+        io.to(Users[user].socketId).emit('contact-added', data);
+      });
+    } else {
+      socket.emit('contact-not-found', true);
+    }
+  }
+
+  // TODO: emit added
 }
 
 webChatSocket.io = io;

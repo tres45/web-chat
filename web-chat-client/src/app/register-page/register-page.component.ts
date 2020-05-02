@@ -47,7 +47,6 @@ export class RegisterPageComponent implements OnInit {
 
     this.auth.register(curUser).subscribe(() => {
       this.formRegister.reset();
-      console.log("Hi")
       this.router.navigate(['/']);
       this.submitted = false;
     }, () => {

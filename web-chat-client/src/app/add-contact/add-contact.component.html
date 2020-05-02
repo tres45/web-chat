@@ -1,0 +1,42 @@
+<div class="backdrop"></div>
+
+<div class="modal">
+  <button type="button" class="close" (click)="contactAdded.emit()">X</button>
+  <div class="m-header">
+    <h1>Add contact</h1>
+  </div>
+  <div>
+    <form [formGroup]="formAddContact" (ngSubmit)="submit()">
+      <div
+        class="add-form-control"
+        [ngClass]="{invalid: formAddContact.get('email').touched && formAddContact.get('email').invalid}"
+      >
+        <input id="email" type="email" formControlName="email" placeholder="Enter email">
+
+        <div
+          class="validation"
+          *ngIf="formAddContact.get('email').touched && formAddContact.get('email').invalid"
+        >
+          <small *ngIf="formAddContact.get('email').errors.required">
+            Enter email address for add new contact.
+          </small>
+          <small *ngIf="formAddContact.get('email').errors.email">
+            Email should be valid.
+          </small>
+          <small *ngIf="formAddContact.get('email').errors.emailNotFound">
+            User with this email not found.
+          </small>
+          <small *ngIf="formAddContact.get('email').errors.emeilExist">
+            User already exists in your contacts.
+          </small>
+        </div>
+      </div>
+
+      <button
+        class="btn btn-primary"
+        type="submit"
+        [disabled]="formAddContact.invalid || submitted"
+      >Add</button>
+    </form>
+  </div>
+</div>

@@ -71,7 +71,6 @@ export class AuthService {
 
   private setToken(response: FbAuthResponse | null) {
     if (response) {
-      console.log(response);
       sessionStorage.setItem('fb-token', response.idToken);
       sessionStorage.setItem('email', response.email);
     } else {

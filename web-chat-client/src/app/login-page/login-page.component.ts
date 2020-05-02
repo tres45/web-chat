@@ -36,7 +36,6 @@ export class LoginPageComponent implements OnInit {
 
   submit() {
     if (this.formLogin.invalid) {
-      console.log("invalid");
       return;
     }
     this.submitted = true;
@@ -48,7 +47,6 @@ export class LoginPageComponent implements OnInit {
 
     this.auth.login(curUser).subscribe(() => {
       this.formLogin.reset();
-      console.log("Hi");
       this.router.navigate(['/']);
       this.submitted = false;
     }, () => {

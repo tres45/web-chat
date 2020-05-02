@@ -20,3 +20,12 @@ export interface Message {
   id?: number;
   isUnread?: boolean;
 }
+
+export interface Room {
+  name: string;
+  userList: string[];
+  messageList: Message[];
+  isGroup: boolean;
+  roomId?: string;
+  unread?: number;
+}
