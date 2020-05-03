@@ -19,7 +19,7 @@ Users = {
     roomList: RoomId[];
     currentRoom: string
     connected: boolean;
-    ureadMessages: idx[];
+    unreadMessages: idx[];
     newRoom: RoomId[];
   }
 };
@@ -47,9 +47,9 @@ let Rooms = {
   }
 };
 let roomCounter = Object.keys(Rooms).length;
-// TODO nickname
+
 io.on('connection', function(socket) {
-  //TODO: from db
+
   socket.on('new-connection', (userName) => {
     newConnection(userName, socket);
   });
@@ -57,7 +57,7 @@ io.on('connection', function(socket) {
   socket.on('new-message', (message) => {
     newMessage(message, socket);
   });
-  //DONE+-
+
   socket.on('change-room', (data) => {
     changeRoom(data, socket);
   });
@@ -75,7 +75,7 @@ io.on('connection', function(socket) {
   });
 
 });
-// DONE
+
 function newConnection(userName, socket) {
   connectUser(userName, socket);
   let data = [];
@@ -87,8 +87,8 @@ function newConnection(userName, socket) {
       messageList.push(message);
     });
 
-    if ('ureadMessages' in Users[userName]) {
-      let unreadList = Users[userName].ureadMessages;
+    if ('unreadMessages' in Users[userName]) {
+      let unreadList = Users[userName].unreadMessages;
       for (let i = 0; i < unreadList.length; i++) {
         let idx = unreadList[i];
         let addedIdx = Rooms[roomId].messageList.indexOf(idx);
@@ -107,6 +107,12 @@ function newConnection(userName, socket) {
 }
 
 function newMessage(message, socket) {
+  firebase.dbGetAllRooms().then((table) => {
+    console.log(table);
+  });
+
+
+
   message.id = MessageList.length;
   MessageList.push(message);
   firebase.dbNewMessage(message);
@@ -119,11 +125,13 @@ function newMessage(message, socket) {
   Rooms[message.toRoom].userList.forEach((userName) => {
     if (userName !== message.fromUser) {
       if (Users[userName].connected && Users[userName].currentRoom !== message.toRoom) {
-        Users[userName].ureadMessages.push(message.id);
+        Users[userName].unreadMessages.push(message.id);
+        firebase.dbAddUnreadMessage(userName, message.id);
 
         io.to(Users[userName].socketId).emit('new-message', message);
       } else if (!Users[userName].connected) {
-        Users[userName].ureadMessages.push(message.id);
+        Users[userName].unreadMessages.push(message.id);
+        firebase.dbAddUnreadMessage(userName, message.id);
       }
     }
   });
@@ -140,7 +148,7 @@ function discconectBySocketId(id) {
     }
   });
 }
-// TODO: from db
+
 function connectUser(userName, socket) {
   if (!(userName in Users)) {
     createRoom(userName, userName, [userName], false);
@@ -150,7 +158,7 @@ function connectUser(userName, socket) {
       Rooms['0'].userList.push(userName);
       Users[userName].roomList = ['0'];
       Users[userName].roomList.push(userName);
-      Users[userName].ureadMessages = [];
+      Users[userName].unreadMessages = [];
       firebase.dbCreateUser(userName);
     }
   }
@@ -187,18 +195,20 @@ function createRoom(roomId, roomName, userList, isGroup) {
   return roomId;
 }
 
-// TODO: DONE +-
 function changeRoom(data, socket) {
   socket.leave(data.curRoom);
   socket.join(data.toRoom);
   Users[data.user].currentRoom = data.toRoom;
   firebase.dbChangeRoom(data);
 
-  let unreadList = Users[data.user].ureadMessages;
-  for (let i = 0; i < Users[data.user].ureadMessages.length; i++) {
+  let count = 0;
+  let unreadList = Users[data.user].unreadMessages;
+  for (let i = 0; i < Users[data.user].unreadMessages.length; i++) {
     if (Rooms[data.toRoom].messageList.indexOf(unreadList[i]) !== -1) {
       unreadList.splice(i, 1);
+      firebase.dbDelUnreadMessage(data.user, i+count);
       i--;
+      count++;
     }
   }
 }

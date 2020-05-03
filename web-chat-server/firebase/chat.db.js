@@ -10,14 +10,14 @@ firebase.initializeApp({
 var db = firebase.database();
 var ref = db.ref("restricted_access/secret_document");
 
-// ref.child('Rooms').push({
-//     name: 'General chat',
-//     isGroup: true,
-//     roomId: '0'
-// });
+ref.child('Rooms').push({
+    name: 'General chat',
+    isGroup: true,
+    roomId: '0'
+});
 
-function getRef(table, keyName, keyValue) {
-    return ref.child(table).orderByChild(keyName).equalTo(keyValue)
+function getRef(refNode, table, keyName, keyValue) {
+    return refNode.child(table).orderByChild(keyName).equalTo(keyValue)
         .once("value").then(function(snapshot) {
         let _ref;
         snapshot.forEach(function(childSnapshot) {
@@ -30,7 +30,7 @@ function getRef(table, keyName, keyValue) {
 
 function NewMessage(message) {
     ref.child('messageList').push(message);
-    getRef('Rooms', 'roomId', message.toRoom).then(_ref => {
+    getRef(ref, 'Rooms', 'roomId', message.toRoom).then(_ref => {
         _ref.child('messageList').push({
             idx: message.id
         });
@@ -56,7 +56,7 @@ function createRoom(room) {
 function updateUsersRoomList(room) {
     let _ref = ref.child('Users');
     room.userList.forEach((user) => {
-        getRef('Users', 'name', user).then(_ref => {
+        getRef(ref, 'Users', 'name', user).then(_ref => {
             _ref.child('roomList').push({
                 roomId: room.roomId
             });
@@ -65,12 +65,11 @@ function updateUsersRoomList(room) {
 }
 
 function changeRoom(data) {
-    getRef('Users', 'name', data.user).then(_ref => {
+    getRef(ref, 'Users', 'name', data.user).then(_ref => {
         _ref.update({
             'currentRoom': data.toRoom
         });
     });
-    // TODO: remove unread msg from room
 }
 
 function createUser(name) {
@@ -78,19 +77,45 @@ function createUser(name) {
         name: name,
         currentRoom: ''
     });
-    _ref.child('roomList').push('0');
-    _ref.child('roomList').push(name);
-    getRef('Rooms', 'roomId', '0').then(_ref => {
-        _ref.child('userList').push(name);
+    _ref.child('roomList').push({
+        roomId: '0'
+    });
+    _ref.child('roomList').push({
+        roomId: name
+    });
+    getRef(ref, 'Rooms', 'roomId', '0').then(cur_ref => {
+        cur_ref.child('userList').push(name);
     });
 }
 
 function resetUserCurRoom(name) {
-    getRef('Users', 'name', name).then(_ref => {
+    getRef(ref, 'Users', 'name', name).then(_ref => {
         _ref.update({
             'currentRoom': ''
         });
     });
+}
+
+function addUnreadMessage(name, messageId) {
+    getRef(ref, 'Users', 'name', name).then(_ref => {
+        _ref.child('unreadMessages').push({
+            idx: messageId
+        });
+    });
+}
+
+function delUnreadMessage(user, idx) {
+    getRef(ref, 'Users', 'name', user).then(userRef => {
+        getRef(userRef, 'unreadMessages', 'idx', idx).then(_ref => {
+            _ref.remove();
+        });
+    });
+}
+
+function getAllRooms() {
+    return ref.child('Rooms').once('value').then((data) => {
+        return data.val();
+    })
 }
 
 FbStorage = {
@@ -99,6 +124,9 @@ FbStorage = {
     dbNewMessage: NewMessage,
     dbCreateRoom: createRoom,
     dbChangeRoom: changeRoom,
-    dbUpdateUsersRoomList: updateUsersRoomList
+    dbUpdateUsersRoomList: updateUsersRoomList,
+    dbAddUnreadMessage: addUnreadMessage,
+    dbDelUnreadMessage: delUnreadMessage,
+    dbGetAllRooms: getAllRooms
 };
 module.exports = FbStorage;
