@@ -1,5 +1,8 @@
-// @import "~bootstrap/dist/css/bootstrap.css";
 @import url('https://fonts.googleapis.com/css?family=Roboto');
+@import "~quill/dist/quill.core.css";
+@import "~quill/dist/quill.bubble.css";
+@import "~quill/dist/quill.snow.css";
+@import "~quill-emoji/dist/quill-emoji.css";
 
 :root {
   --primary-color: #dc3545;

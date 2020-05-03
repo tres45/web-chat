@@ -7,6 +7,9 @@ import {Room} from '../shared/interfaces';
 import {AuthService} from '../shared/services/auth.service';
 import {Router} from '@angular/router';
 
+import 'quill-mention';
+import 'quill-emoji';
+
 @Component({
   selector: 'app-home-page',
   templateUrl: './home-page.component.html',
@@ -14,7 +17,9 @@ import {Router} from '@angular/router';
 })
 export class HomePageComponent implements OnInit, AfterViewChecked {
 
+  quillModules = {};
   formMessage: FormGroup;
+
   user = '';
   roomId = '';
   roomIdx = -1;
@@ -32,6 +37,24 @@ export class HomePageComponent implements OnInit, AfterViewChecked {
   private scrContacts: ElementRef;
 
   constructor(public chatService: ChatService, public auth: AuthService, private router: Router) {
+    this.quillModules = {
+      toolbar: {
+        container: [
+          ['bold', 'underline'],
+          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+          [{ 'color': [] }, { 'background': [] }],
+          ['image', 'video'],
+          ['emoji'],
+        ],
+        handlers: {
+          'emoji': function() {
+          }},
+      },
+      'emoji-toolbar': true,
+      'emoji-textarea': false,
+      'emoji-shortname': true,
+    };
+
   }
 
   ngAfterViewChecked() {
@@ -53,8 +76,9 @@ export class HomePageComponent implements OnInit, AfterViewChecked {
         this.roomList[idx].messageList.push(message);
         if (this.roomIdx !== idx) {
           this.roomList[idx].unread++;
+        } else {
+          this.scrollToBottom();
         }
-        this.scrollToBottom();
       });
 
     this.chatService.loadData()

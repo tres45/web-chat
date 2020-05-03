@@ -80,7 +80,9 @@ Website: http://emilcarlsson.se/
               class="sent"
               *ngIf="roomList[roomIdx].messageList[idx].fromUser === user"
             >
-              <p>{{roomList[roomIdx].messageList[idx].message}}</p>
+              <div>
+                <p><quill-view-html [content]="roomList[roomIdx].messageList[idx].message"></quill-view-html></p>
+              </div>
             </li>
             <li
               class="replies"
@@ -88,7 +90,10 @@ Website: http://emilcarlsson.se/
             >
               <p class="sender">{{roomList[roomIdx].messageList[idx].fromUser + ':'}}</p>
               <br>
-              <p>{{roomList[roomIdx].messageList[idx].message}}</p>
+              <div>
+<!--            <p>{{roomList[roomIdx].messageList[idx].message}}</p>-->
+                <p><quill-view-html [content]="roomList[roomIdx].messageList[idx].message"></quill-view-html></p>
+              </div>
             </li>
           </div>
         </div>
@@ -97,17 +102,15 @@ Website: http://emilcarlsson.se/
     <div class="message-input">
       <form class="message-input" [formGroup]="formMessage" (ngSubmit)="sendMessage()">
         <div class="row">
-          <div class="col-sm-9 custom-pad">
-            <textarea rows="5" type="text" formControlName="message" placeholder="Enter message"></textarea>
+          <div class="col-sm-12 custom-pad">
+            <quill-editor [styles]="{maxHeight: '145px', minHeight: '145px'}" [modules]="quillModules" formControlName="message" placeholder="Enter message"></quill-editor>
           </div>
-          <div class="col-sm-2 custom-pad">
-            <button
-              type="submit" class="btn-submit"
-              [disabled]="roomIdx === -1"
-            >
-              <i class="fa fa-paper-plane" aria-hidden="true"></i>
-            </button>
-          </div>
+          <button
+            type="submit" class="btn-primary btn-submit"
+            [disabled]="roomIdx === -1"
+          >
+            <i class="fa fa-paper-plane" aria-hidden="true"></i>
+          </button>
         </div>
       </form>
     </div>

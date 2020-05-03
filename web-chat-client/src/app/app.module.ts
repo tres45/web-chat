@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
+import { QuillModule } from 'ngx-quill';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -28,6 +29,7 @@ import { AddGroupComponent } from './add-group/add-group.component';
     FormsModule,
     HttpClientModule,
     ReactiveFormsModule,
+    QuillModule.forRoot(),
     NgMultiSelectDropDownModule.forRoot()
   ],
   providers: [],
