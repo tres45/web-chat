@@ -49,16 +49,15 @@ let Rooms = {
 let roomCounter = Object.keys(Rooms).length;
 // TODO nickname
 io.on('connection', function(socket) {
-
+  //TODO: from db
   socket.on('new-connection', (userName) => {
     newConnection(userName, socket);
   });
 
   socket.on('new-message', (message) => {
     newMessage(message, socket);
-    firebase.dbNewMessage(message);
   });
-
+  //DONE+-
   socket.on('change-room', (data) => {
     changeRoom(data, socket);
   });
@@ -76,7 +75,7 @@ io.on('connection', function(socket) {
   });
 
 });
-
+// DONE
 function newConnection(userName, socket) {
   connectUser(userName, socket);
   let data = [];
@@ -110,9 +109,11 @@ function newConnection(userName, socket) {
 function newMessage(message, socket) {
   message.id = MessageList.length;
   MessageList.push(message);
+  firebase.dbNewMessage(message);
   console.log('[new-message]:', message);
   Rooms[message.toRoom].messageList.push(message.id);
 
+  // TODO: io.sockets.in('room1').emit('function', {foo:bar});
   socket.broadcast.to(message.toRoom).emit('new-message', message);
 
   Rooms[message.toRoom].userList.forEach((userName) => {
@@ -134,11 +135,12 @@ function discconectBySocketId(id) {
       Users[userName].socketId = -1;
       Users[userName].connected = false;
       Users[userName].currentRoom = '';
+      firebase.dbResetUserCurRoom(userName);
       return;
     }
   });
 }
-
+// TODO: from db
 function connectUser(userName, socket) {
   if (!(userName in Users)) {
     createRoom(userName, userName, [userName], false);
@@ -149,6 +151,7 @@ function connectUser(userName, socket) {
       Users[userName].roomList = ['0'];
       Users[userName].roomList.push(userName);
       Users[userName].ureadMessages = [];
+      firebase.dbCreateUser(userName);
     }
   }
   else {
@@ -159,6 +162,7 @@ function connectUser(userName, socket) {
   Users[userName].currentRoom = '';
   Users[userName].socketId = socket.id;
   Users[userName].connected = true;
+  firebase.dbResetUserCurRoom(userName);
   console.log('User', userName, 'connected');
 }
 
@@ -178,14 +182,17 @@ function createRoom(roomId, roomName, userList, isGroup) {
       roomId: roomId,
       unread: 0
     };
+    firebase.dbCreateRoom(Rooms[roomId]);
   }
   return roomId;
 }
 
+// TODO: DONE +-
 function changeRoom(data, socket) {
   socket.leave(data.curRoom);
   socket.join(data.toRoom);
   Users[data.user].currentRoom = data.toRoom;
+  firebase.dbChangeRoom(data);
 
   let unreadList = Users[data.user].ureadMessages;
   for (let i = 0; i < Users[data.user].ureadMessages.length; i++) {
@@ -208,6 +215,7 @@ function addContact(data, socket) {
 
         io.to(Users[user].socketId).emit('contact-added', data);
       });
+      firebase.dbUpdateUsersRoomList(data);
     } else {
       socket.emit('contact-not-found', true);
     }
@@ -223,6 +231,7 @@ function addGroup(data, socket) {
 
       io.to(Users[user].socketId).emit('group-added', data);
     });
+    firebase.dbUpdateUsersRoomList(data);
   }
 }
 
