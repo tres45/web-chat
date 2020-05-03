@@ -1,4 +1,5 @@
 let socketIo = require('socket.io');
+let firebase = require('../firebase/chat.db');
 
 let io = socketIo();
 let webChatSocket = {};
@@ -55,6 +56,7 @@ io.on('connection', function(socket) {
 
   socket.on('new-message', (message) => {
     newMessage(message, socket);
+    firebase.dbNewMessage(message);
   });
 
   socket.on('change-room', (data) => {
