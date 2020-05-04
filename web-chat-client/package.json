@@ -9,7 +9,7 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "publishheroku": "cd ../ && git subtree push --prefix web-chat-client seosadchyi-webchat master",
-	"postinstall": "ng build --aot --prod"
+	"postinstall": "ng serve"
   },
   "private": true,
   "dependencies": {
