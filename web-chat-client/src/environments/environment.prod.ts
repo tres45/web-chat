@@ -7,6 +7,6 @@ export const environment: Environment = {
   apiKey: 'AIzaSyBCdRqYEbGuwYFI81vtir7jp__J_Z2C1mM',
   signInfbUrl: "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword",
   signUpfbUrl: "https://identitytoolkit.googleapis.com/v1/accounts:signUp",
-  socketUrl: 'http://localhost:3000',
-  // fbDbUrl: 'https://angular-blog-6cd5f.firebaseio.com'
+  // socketUrl: 'http://localhost:3000',
+  socketUrl: 'https://seosadchyi-webchat-server.herokuapp.com/'
 };
