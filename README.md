@@ -10,4 +10,4 @@ Heroku link:
 Made by Serhii Osadchyi
 
 
-Note: Tetime to time heroku app sleeping
+Note: Time to time heroku app sleeping
