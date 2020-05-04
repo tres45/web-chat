@@ -17,6 +17,7 @@ export class ChatService {
   constructor(private auth: AuthService) {
   }
 
+  // Create socket for connect with server
   public createSocket(curUser) {
     if (this.auth.isAuthenticated()) {
       this.socket = io(`${environment.socketUrl}`);
@@ -29,6 +30,7 @@ export class ChatService {
     this.socket.emit('new-message', message);
   }
 
+  // Create observable for listen server on new messages
   public getMessages(): Observable<any> {
     return Observable.create((observer) => {
       this.socket.on('new-message', (message) => {
@@ -37,6 +39,7 @@ export class ChatService {
     });
   }
 
+  // Create observable for load user data from server
   public loadData(): Observable<any> {
     return Observable.create((observer) => {
       this.socket.on('load-data', (data) => {
@@ -57,6 +60,7 @@ export class ChatService {
     this.socket.emit('add-group', data);
   }
 
+  // Create observable for listen server on new friend
   public contactAdded(): Observable<any> {
     return Observable.create((observer) => {
       this.socket.on('contact-added', (data) => {
@@ -65,6 +69,7 @@ export class ChatService {
     });
   }
 
+  // Create observable for listen server on new groups
   public groupAdded(): Observable<any> {
     return Observable.create((observer) => {
       this.socket.on('group-added', (data) => {
@@ -73,6 +78,7 @@ export class ChatService {
     });
   }
 
+  // Create observable for listen server on wrong contact
   public contactNotFound(): Observable<any> {
     return Observable.create((observer) => {
       this.socket.on('contact-not-found', (res) => {

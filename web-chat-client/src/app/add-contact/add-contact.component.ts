@@ -22,12 +22,14 @@ export class AddContactComponent implements OnInit {
   constructor(public account: HomePageComponent) { }
 
   ngOnInit(): void {
+    // Initialize from for add contact
     this.formAddContact = new FormGroup({
       email: new FormControl(null, [
         Validators.required, Validators.email
       ])
     });
 
+    // subscribe on socket io for check if contact registered
     this.account.chatService.contactNotFound()
       .subscribe((res) => {
         this.isContactNotFound = res;
@@ -46,6 +48,7 @@ export class AddContactComponent implements OnInit {
     });
   }
 
+  // Find and add contact
   submit() {
     this.isExist = false;
     if (this.formAddContact.invalid) {
@@ -57,16 +60,20 @@ export class AddContactComponent implements OnInit {
       return;
     }
 
+    // Load data from input form
     this.submitted = true;
-    const data: Room = { // TODO
+    const data: Room = {
       name: this.account.user + '↵' + this.formAddContact.value.email,
       userList: [this.account.user, this.formAddContact.value.email],
       messageList: [],
       isGroup: false,
     };
 
+    // Emit signal for add new contact
     this.account.chatService.addContact(data);
+    // Need timeout for socket
     setTimeout(() => {
+      // If user not found - return error to form validator
       if (this.isContactNotFound) {
         this.notFoundError();
         if (this.formAddContact.invalid) {
@@ -75,6 +82,8 @@ export class AddContactComponent implements OnInit {
           return;
         }
       }
+
+      // Reset form and emit close modal window
       this.isContactNotFound = false;
       this.submitted = false;
       this.formAddContact.reset();

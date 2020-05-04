@@ -11,34 +11,38 @@ import {environment} from '../../../environments/environment';
 })
 export class AuthService {
 
+  // Need for handle errors from firebase
   public error$: Subject<string> = new Subject<string>();
 
   constructor(private http: HttpClient) {
   }
 
+  // Getter with check on token - need for check user auth.
   get token(): string {
     return sessionStorage.getItem('fb-token');
   }
 
+  // Post user credentials to firebase auth db for login
   login(curUser: User): Observable<any> {
     curUser.returnSecureToken = true;
     return this.http.post(
       `${environment.signInfbUrl}?key=${environment.apiKey}`,
       curUser
     ).pipe(
-      tap(this.setToken),
-      catchError(this.handleError.bind(this))
+      tap(this.setToken), // Intercept response for setup token
+      catchError(this.handleError.bind(this)) // Handle errors
     );
   }
 
+  // Post user credentials to firebase auth db for register new user
   register(curUser: User): Observable<any> {
     curUser.returnSecureToken = true;
     return this.http.post(
       `${environment.signUpfbUrl}?key=${environment.apiKey}`,
       curUser
     ).pipe(
-      tap(this.setToken),
-      catchError(this.handleError.bind(this))
+      tap(this.setToken), // Intercept response for setup token
+      catchError(this.handleError.bind(this)) // Handle errors
     );
   }
 
@@ -46,10 +50,12 @@ export class AuthService {
     this.setToken(null);
   }
 
+  // Check if user authorized
   isAuthenticated(): boolean {
     return !!this.token;
   }
 
+  // Handle errors from firebase response
   private handleError(error: HttpErrorResponse) {
     const {message} = error.error.error;
     switch (message) {
@@ -69,6 +75,7 @@ export class AuthService {
     return throwError(error);
   }
 
+  // Attach token from firebase to session
   private setToken(response: FbAuthResponse | null) {
     if (response) {
       sessionStorage.setItem('fb-token', response.idToken);

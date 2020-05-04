@@ -23,6 +23,7 @@ export class RegisterPageComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Initialize from for registration
     this.formRegister = new FormGroup({
       email: new FormControl(null, [
         Validators.required, Validators.email
@@ -34,17 +35,20 @@ export class RegisterPageComponent implements OnInit {
     });
   }
 
+  // Register new account
   submit() {
     if (this.formRegister.invalid) {
       return;
     }
-    this.submitted = true;
 
+    // Load data from input form
+    this.submitted = true;
     const curUser: User = {
       email: this.formRegister.value.email,
       password: this.formRegister.value.password
     };
 
+    // Use auth service for registration
     this.auth.register(curUser).subscribe(() => {
       this.formRegister.reset();
       this.router.navigate(['/']);

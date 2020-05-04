@@ -13,8 +13,4 @@ export class AppComponent {
   constructor(private chatService: ChatService) {
   }
 
-  sendMessage() {
-    this.chatService.sendMessage(this.message);
-    this.message = '';
-  }
 }

@@ -19,10 +19,8 @@ Users = {
     currentRoom: string
     connected: boolean;
     unreadMessages: idx[];
-    newRoom: RoomId[];
   }
 };
-roomCounter: int;
 Rooms = {
   roomId: {
     name: string;
@@ -34,6 +32,7 @@ Rooms = {
 }
 */
 
+// Init local db
 let Users = {};
 let MessageList = [];
 let Rooms = {
@@ -47,6 +46,7 @@ let Rooms = {
 };
 let roomCounter = Object.keys(Rooms).length;
 
+// Use socket io
 io.on('connection', function(socket) {
 
   socket.on('new-connection', (userName) => {
@@ -76,9 +76,13 @@ io.on('connection', function(socket) {
 });
 
 function newConnection(userName, socket) {
+  // Update user status
   connectUser(userName, socket);
+
+  // Collect data for account
   let data = [];
   Users[userName].roomList.forEach((roomId) => {
+    // Collect all messages
     let messageList = [];
     Rooms[roomId].messageList.forEach((idx) => {
       let message = MessageList[idx];
@@ -86,6 +90,7 @@ function newConnection(userName, socket) {
       messageList.push(message);
     });
 
+    // Mark specific message as unread
     if ('unreadMessages' in Users[userName]) {
       let unreadList = Users[userName].unreadMessages;
       for (let i = 0; i < unreadList.length; i++) {
@@ -102,22 +107,26 @@ function newConnection(userName, socket) {
     data.push(roomData);
   });
 
+  // Send account data to client
   socket.emit('load-data', data);
 }
 
 function newMessage(message, socket) {
+  // Update messages
   message.id = MessageList.length;
   MessageList.push(message);
   Rooms[message.toRoom].messageList.push(message.id);
 
-  // TODO: io.sockets.in('room1').emit('function', {foo:bar});
+  // TODO: Fix open 2+ session with same account without bugs
   socket.broadcast.to(message.toRoom).emit('new-message', message);
 
+  // Mark message as unread if user inside another chat or disconnect at this moment
   Rooms[message.toRoom].userList.forEach((userName) => {
     if (userName !== message.fromUser) {
       if (Users[userName].connected && Users[userName].currentRoom !== message.toRoom) {
         Users[userName].unreadMessages.push(message.id);
 
+        // Send new message to client by socket id
         io.to(Users[userName].socketId).emit('new-message', message);
       } else if (!Users[userName].connected) {
         Users[userName].unreadMessages.push(message.id);
@@ -139,6 +148,7 @@ function discconectBySocketId(id) {
 
 function connectUser(userName, socket) {
   if (!(userName in Users)) {
+    // Create new room for new user
     createRoom(userName, userName, [userName], false);
 
     if (Rooms['0'].userList.indexOf(userName) === -1) {
@@ -152,6 +162,7 @@ function connectUser(userName, socket) {
   else {
     socket.leave(Users[userName].currentRoom);
   }
+  // Join user to himself room
   socket.join(userName);
 
   Users[userName].currentRoom = '';
@@ -159,6 +170,7 @@ function connectUser(userName, socket) {
   Users[userName].connected = true;
 }
 
+// Create group room or simple ike a contact
 function createRoom(roomId, roomName, userList, isGroup) {
   if (!roomId) {
     roomId = roomCounter++;
@@ -184,6 +196,7 @@ function changeRoom(data, socket) {
   socket.join(data.toRoom);
   Users[data.user].currentRoom = data.toRoom;
 
+  // Remove unread messages from target room
   let count = 0;
   let unreadList = Users[data.user].unreadMessages;
   for (let i = 0; i < Users[data.user].unreadMessages.length; i++) {
@@ -195,6 +208,7 @@ function changeRoom(data, socket) {
   }
 }
 
+// Create contact room, not group chat
 function addContact(data, socket) {
   if (!data.isGroup) {
     if (data.userList[0] === data.userList[1]) {
@@ -213,6 +227,7 @@ function addContact(data, socket) {
   }
 }
 
+// Create group chat
 function addGroup(data, socket) {
   if (data.isGroup) {
     let newId = createRoom(null, data.name, data.userList, true);

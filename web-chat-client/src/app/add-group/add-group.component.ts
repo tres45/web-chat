@@ -22,6 +22,7 @@ export class AddGroupComponent implements OnInit {
   groupAdded = new EventEmitter<void>();
 
   ngOnInit(): void {
+    // Initialize from for add group
     this.formAddGroup = new FormGroup({
       groupName: new FormControl(null, [
         Validators.required
@@ -51,11 +52,13 @@ export class AddGroupComponent implements OnInit {
     };
   }
 
+  // Create group only from user contact book
   submit() {
     if (this.formAddGroup.invalid) {
       return;
     }
 
+    // Load data from input form
     this.submitted = true;
     let userList = [];
     this.formAddGroup.value.groupMembers.forEach((member) => {
@@ -72,6 +75,7 @@ export class AddGroupComponent implements OnInit {
       isGroup: true,
     };
 
+    // Emit signal for create group
     this.account.chatService.addGroup(data);
     this.formAddGroup.reset();
     this.groupAdded.emit();

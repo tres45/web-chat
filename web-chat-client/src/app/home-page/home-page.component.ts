@@ -17,9 +17,11 @@ import 'quill-emoji';
 })
 export class HomePageComponent implements OnInit, AfterViewChecked {
 
+  // For input message
   quillModules = {};
   formMessage: FormGroup;
 
+  // User data
   user = '';
   roomId = '';
   roomIdx = -1;
@@ -27,6 +29,7 @@ export class HomePageComponent implements OnInit, AfterViewChecked {
   roomList: Room[] = [];
   contactBook = {};
 
+  // For add new contact and create group chat
   modalContact = false;
   modalGroup = false;
 
@@ -37,6 +40,7 @@ export class HomePageComponent implements OnInit, AfterViewChecked {
   private scrContacts: ElementRef;
 
   constructor(public chatService: ChatService, public auth: AuthService, private router: Router) {
+    // Setup text editor from
     this.quillModules = {
       toolbar: {
         container: [
@@ -57,18 +61,22 @@ export class HomePageComponent implements OnInit, AfterViewChecked {
 
   }
 
+  // Need for scroll-down
   ngAfterViewChecked() {
     this.scrollToBottom();
   }
 
   ngOnInit(): void {
+    // Initialize form for send messages
     this.formMessage = new FormGroup({
-      message: new FormControl(null,[Validators.required])
+      message: new FormControl(null, [Validators.required])
     });
 
+    // Connect to server
     this.user = sessionStorage.getItem('email');
     this.chatService.createSocket(this.user);
 
+    // Listen server on new messages
     this.chatService.getMessages()
       .subscribe((message: Message) => {
         const idx = this.getRoomIdxByRoomId(message.toRoom);
@@ -80,6 +88,7 @@ export class HomePageComponent implements OnInit, AfterViewChecked {
         }
       });
 
+    // Listen server on load data about this account
     this.chatService.loadData()
       .subscribe((data: Room[]) => {
         data.forEach((curRum) => {
@@ -99,6 +108,7 @@ export class HomePageComponent implements OnInit, AfterViewChecked {
         this.scrollToBottom();
       });
 
+    // Listen server on notification if this account added to another contact book
     this.chatService.contactAdded()
       .subscribe((data: Room) => {
         data.userList.forEach((name) => {
@@ -117,6 +127,7 @@ export class HomePageComponent implements OnInit, AfterViewChecked {
       });
   }
 
+  // Stay scroll always on bottom
   scrollToBottom() {
     try {
       this.scrMessages.nativeElement.scrollTop = this.scrMessages.nativeElement.scrollHeight;
@@ -126,6 +137,7 @@ export class HomePageComponent implements OnInit, AfterViewChecked {
     } catch(err) { }
   }
 
+  // Send message to server
   sendMessage() {
     if (!this.auth.isAuthenticated()) {
       this.router.navigate(['/login']);
@@ -140,11 +152,14 @@ export class HomePageComponent implements OnInit, AfterViewChecked {
       return;
     }
 
+    // Load data from input form
     const message: Message = {
       fromUser: this.user,
       toRoom: this.roomId,
       message: msg
     };
+
+    // TODO: Fix open 2+ session with same account without bugs
     this.roomList[this.roomIdx].messageList.push(message);
     this.chatService.sendMessage(message);
     this.formMessage.reset();
@@ -163,10 +178,11 @@ export class HomePageComponent implements OnInit, AfterViewChecked {
     return idx;
   }
 
+  // Change between chats
   changeRoom(curRoom, toRoom) {
     if (curRoom === toRoom) {
       return;
-    }// TODO
+    }
     const idx = this.getRoomIdxByRoomId(toRoom);
     this.roomIdx = idx;
     this.roomName = this.roomList[idx].name;
@@ -196,6 +212,7 @@ export class HomePageComponent implements OnInit, AfterViewChecked {
     this.changeRoom(curRoom, toRoom);
   }
 
+  // Get chat name. Need for case when room is contact
   getRoomNameById(id: string): string {
     if (id === '') {
       return '';

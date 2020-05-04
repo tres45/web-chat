@@ -13,6 +13,7 @@ export class AuthGuard implements CanActivate {
   constructor(private chatService: ChatService, private auth: AuthService, private router: Router) {
   }
 
+  // Check on authorization and if not - go to login page
   canActivate(
     route: ActivatedRouteSnapshot, state: RouterStateSnapshot
   ): Observable<boolean> | Promise<boolean> | boolean {
