@@ -1,5 +1,5 @@
 import * as io from 'socket.io-client';
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
 import { AuthService } from './auth.service';

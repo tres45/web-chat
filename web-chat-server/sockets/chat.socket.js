@@ -50,27 +50,45 @@ let roomCounter = Object.keys(Rooms).length;
 io.on('connection', function(socket) {
 
   socket.on('new-connection', (userName) => {
-    newConnection(userName, socket);
+    try {
+      newConnection(userName, socket);
+    } catch (e) {
+    }
   });
 
   socket.on('new-message', (message) => {
-    newMessage(message, socket);
+    try {
+      newMessage(message, socket);
+    } catch (e) {
+    }
   });
 
   socket.on('change-room', (data) => {
-    changeRoom(data, socket);
+    try {
+      changeRoom(data, socket);
+    } catch (e) {
+    }
   });
 
   socket.on('add-contact', (data) => {
-    addContact(data, socket);
+    try {
+      addContact(data, socket);
+    } catch (e) {
+    }
   });
 
   socket.on('add-group', (data) => {
-    addGroup(data, socket);
+    try {
+      addGroup(data, socket);
+    } catch (e) {
+    }
   });
 
   socket.on('disconnect', function() {
-    discconectBySocketId(socket.id);
+    try {
+      discconectBySocketId(socket.id);
+    } catch (e) {
+    }
   });
 
 });

@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewChecked, ElementRef, ViewChild } from '@angular/core';
+import {Component, OnInit, AfterViewChecked, ElementRef, ViewChild, OnDestroy} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 
 import { ChatService } from '../shared/services/chat.service';
@@ -9,13 +9,14 @@ import {Router} from '@angular/router';
 
 import 'quill-mention';
 import 'quill-emoji';
+import {Subscription} from "rxjs";
 
 @Component({
   selector: 'app-home-page',
   templateUrl: './home-page.component.html',
   styleUrls: ['./home-page.component.scss']
 })
-export class HomePageComponent implements OnInit, AfterViewChecked {
+export class HomePageComponent implements OnInit, AfterViewChecked, OnDestroy {
 
   // For input message
   quillModules = {};
@@ -32,6 +33,12 @@ export class HomePageComponent implements OnInit, AfterViewChecked {
   // For add new contact and create group chat
   modalContact = false;
   modalGroup = false;
+
+  // Subscriptions for observables
+  private subGetMsg: Subscription;
+  private subLoadData: Subscription;
+  private subContacs: Subscription;
+  private subGroups: Subscription;
 
   @ViewChild('scrollMessages')
   private scrMessages: ElementRef;
@@ -77,7 +84,7 @@ export class HomePageComponent implements OnInit, AfterViewChecked {
     this.chatService.createSocket(this.user);
 
     // Listen server on new messages
-    this.chatService.getMessages()
+    this.subGetMsg = this.chatService.getMessages()
       .subscribe((message: Message) => {
         const idx = this.getRoomIdxByRoomId(message.toRoom);
         this.roomList[idx].messageList.push(message);
@@ -89,7 +96,7 @@ export class HomePageComponent implements OnInit, AfterViewChecked {
       });
 
     // Listen server on load data about this account
-    this.chatService.loadData()
+    this.subLoadData = this.chatService.loadData()
       .subscribe((data: Room[]) => {
         data.forEach((curRum) => {
           if (curRum.roomId !== '0') {
@@ -109,7 +116,7 @@ export class HomePageComponent implements OnInit, AfterViewChecked {
       });
 
     // Listen server on notification if this account added to another contact book
-    this.chatService.contactAdded()
+    this.subContacs = this.chatService.contactAdded()
       .subscribe((data: Room) => {
         data.userList.forEach((name) => {
           this.contactBook[name] = '';
@@ -119,7 +126,7 @@ export class HomePageComponent implements OnInit, AfterViewChecked {
         this.scrollToBottom();
       });
 
-    this.chatService.groupAdded()
+    this.subGroups = this.chatService.groupAdded()
       .subscribe((data: Room) => {
         data.unread = 0;
         this.roomList.push(data);
@@ -233,6 +240,14 @@ export class HomePageComponent implements OnInit, AfterViewChecked {
       }
     }
     return this.user;
+  }
+
+  // Unsubsribe from observables for prevent memory leak
+  ngOnDestroy() {
+    this.subLoadData.unsubscribe();
+    this.subGroups.unsubscribe();
+    this.subContacs.unsubscribe();
+    this.subGetMsg.unsubscribe();
   }
 
 }

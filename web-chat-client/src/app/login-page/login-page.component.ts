@@ -1,19 +1,22 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {Router, ActivatedRoute} from '@angular/router';
 
 import {User} from '../shared/interfaces';
 import {AuthService} from '../shared/services/auth.service';
+import {Subscription} from "rxjs";
 
 @Component({
   selector: 'app-login-page',
   templateUrl: './login-page.component.html',
   styleUrls: ['./login-page.component.scss']
 })
-export class LoginPageComponent implements OnInit {
+export class LoginPageComponent implements OnInit, OnDestroy {
 
   formLogin: FormGroup;
   submitted = false;
+
+  subLogin: Subscription;
 
   constructor(
     public auth: AuthService,
@@ -49,7 +52,7 @@ export class LoginPageComponent implements OnInit {
     };
 
     // Use auth service for login
-    this.auth.login(curUser).subscribe(() => {
+    this.subLogin = this.auth.login(curUser).subscribe(() => {
       this.formLogin.reset();
       this.router.navigate(['/']);
       this.submitted = false;
@@ -57,4 +60,9 @@ export class LoginPageComponent implements OnInit {
       this.submitted = false;
     });
   }
+
+  ngOnDestroy() {
+    this.subLogin.unsubscribe();
+  }
+
 }
