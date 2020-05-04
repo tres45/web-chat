@@ -242,12 +242,20 @@ export class HomePageComponent implements OnInit, AfterViewChecked, OnDestroy {
     return this.user;
   }
 
+  userLogout() {
+    this.auth.logout();
+    this.router.navigate(['login']);
+  }
+
   // Unsubsribe from observables for prevent memory leak
   ngOnDestroy() {
-    this.subLoadData.unsubscribe();
-    this.subGroups.unsubscribe();
-    this.subContacs.unsubscribe();
-    this.subGetMsg.unsubscribe();
+    try {
+      this.subLoadData.unsubscribe();
+      this.subGroups.unsubscribe();
+      this.subContacs.unsubscribe();
+      this.subGetMsg.unsubscribe();
+    } catch (e) {
+    }
   }
 
 }

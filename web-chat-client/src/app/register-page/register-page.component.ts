@@ -4,19 +4,16 @@ import {Router, ActivatedRoute} from '@angular/router';
 
 import {User} from '../shared/interfaces';
 import {AuthService} from '../shared/services/auth.service';
-import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'app-register-page',
   templateUrl: './register-page.component.html',
   styleUrls: ['./register-page.component.scss']
 })
-export class RegisterPageComponent implements OnInit, OnDestroy {
+export class RegisterPageComponent implements OnInit {
 
   formRegister: FormGroup;
   submitted = false;
-
-  subReg: Subscription;
 
   constructor(
     public auth: AuthService,
@@ -52,16 +49,12 @@ export class RegisterPageComponent implements OnInit, OnDestroy {
     };
 
     // Use auth service for registration
-    this.subReg = this.auth.register(curUser).subscribe(() => {
+    this.auth.register(curUser).subscribe(() => {
       this.formRegister.reset();
       this.router.navigate(['/']);
       this.submitted = false;
     }, () => {
       this.submitted = false;
     });
-  }
-
-  ngOnDestroy() {
-    this.subReg.unsubscribe();
   }
 }

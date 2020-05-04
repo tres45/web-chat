@@ -1,7 +1,5 @@
 body {
   display: flex;
-  align-items: center;
-  justify-content: center;
   min-height: 100vh;
   background: #F08080;
   font-family: "proxima-nova", "Source Sans Pro", sans-serif;
@@ -21,6 +19,7 @@ body {
   min-height: 300px;
   max-height: 800px;
   background: #E6EAEA;
+  margin: 50px auto;
 }
 
 #frame #sidepanel {
@@ -75,6 +74,12 @@ body {
   -o-transition: 0.3s height ease;
   -webkit-transition: 0.3s height ease;
   transition: 0.3s height ease;
+}
+#frame #sidepanel #profile .wrap .btn {
+  float: right;
+  background: #435f7a;
+  border-color: #243140;
+  margin-top: 15px;
 }
 @media screen and (max-width: 735px) {
   #frame #sidepanel #profile .wrap {

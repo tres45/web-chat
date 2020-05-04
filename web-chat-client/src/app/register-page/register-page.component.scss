@@ -1,9 +1,26 @@
+body {
+  display: flex;
+  min-height: 100vh;
+  background: #F08080;
+  font-family: "proxima-nova", "Source Sans Pro", sans-serif;
+  font-size: 1em;
+  letter-spacing: 0.1px;
+  color: #32465a;
+  text-rendering: optimizeLegibility;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.004);
+  -webkit-font-smoothing: antialiased;
+}
+
 form {
+  max-height: 400px;
   max-width: 600px;
+  background: #2c3e50;
+  border: 1px solid #243140;
   margin: 100px auto;
 
   h2 {
     margin-bottom: 20px;
+    color: #f5f5f5;
   }
 }
 
@@ -14,8 +31,16 @@ form {
   text-align: center;
 }
 
-
 .btn {
   margin-top: 30px;
   width: 100%;
+  background: #435f7a;
+}
+
+label {
+  color: #f5f5f5;
+}
+
+input {
+  background: #f5f5f5;
 }

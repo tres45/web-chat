@@ -4,19 +4,16 @@ import {Router, ActivatedRoute} from '@angular/router';
 
 import {User} from '../shared/interfaces';
 import {AuthService} from '../shared/services/auth.service';
-import {Subscription} from "rxjs";
 
 @Component({
   selector: 'app-login-page',
   templateUrl: './login-page.component.html',
   styleUrls: ['./login-page.component.scss']
 })
-export class LoginPageComponent implements OnInit, OnDestroy {
+export class LoginPageComponent implements OnInit {
 
   formLogin: FormGroup;
   submitted = false;
-
-  subLogin: Subscription;
 
   constructor(
     public auth: AuthService,
@@ -52,17 +49,13 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     };
 
     // Use auth service for login
-    this.subLogin = this.auth.login(curUser).subscribe(() => {
+    this.auth.login(curUser).subscribe(() => {
       this.formLogin.reset();
       this.router.navigate(['/']);
       this.submitted = false;
     }, () => {
       this.submitted = false;
     });
-  }
-
-  ngOnDestroy() {
-    this.subLogin.unsubscribe();
   }
 
 }
