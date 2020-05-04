@@ -3,13 +3,12 @@
  "version": "0.0.1",
  "scripts": {
   "ng": "ng",
-  // "start": "ng serve --proxy-config proxy-config.json",
   "start": "node server.js",
   "build": "ng build",
   "test": "ng test",
   "lint": "ng lint",
   "e2e": "ng e2e",
-  "postinstall": "ng build --aot --target=production"
+  "postinstall": "ng build --aot --prod"
  },
  "private": true,
  "dependencies": {
