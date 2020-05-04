@@ -39,7 +39,7 @@
     "protractor": "~5.4.3",
     "ts-node": "~8.3.0",
     "tslint": "~6.1.0",
-    "typescript": "~3.8.3"
+    "typescript": "~3.8.3",
     "bootstrap": "^4.4.1",
     "ng-multiselect-dropdown": "^0.2.10",
     "ngx-quill": "^9.1.0",
