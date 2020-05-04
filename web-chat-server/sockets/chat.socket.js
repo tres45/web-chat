@@ -1,5 +1,4 @@
 let socketIo = require('socket.io');
-let firebase = require('../firebase/chat.db');
 
 let io = socketIo();
 let webChatSocket = {};
@@ -107,16 +106,8 @@ function newConnection(userName, socket) {
 }
 
 function newMessage(message, socket) {
-  firebase.dbGetAllRooms().then((table) => {
-    console.log(table);
-  });
-
-
-
   message.id = MessageList.length;
   MessageList.push(message);
-  firebase.dbNewMessage(message);
-  console.log('[new-message]:', message);
   Rooms[message.toRoom].messageList.push(message.id);
 
   // TODO: io.sockets.in('room1').emit('function', {foo:bar});
@@ -126,12 +117,10 @@ function newMessage(message, socket) {
     if (userName !== message.fromUser) {
       if (Users[userName].connected && Users[userName].currentRoom !== message.toRoom) {
         Users[userName].unreadMessages.push(message.id);
-        firebase.dbAddUnreadMessage(userName, message.id);
 
         io.to(Users[userName].socketId).emit('new-message', message);
       } else if (!Users[userName].connected) {
         Users[userName].unreadMessages.push(message.id);
-        firebase.dbAddUnreadMessage(userName, message.id);
       }
     }
   });
@@ -143,7 +132,6 @@ function discconectBySocketId(id) {
       Users[userName].socketId = -1;
       Users[userName].connected = false;
       Users[userName].currentRoom = '';
-      firebase.dbResetUserCurRoom(userName);
       return;
     }
   });
@@ -159,7 +147,6 @@ function connectUser(userName, socket) {
       Users[userName].roomList = ['0'];
       Users[userName].roomList.push(userName);
       Users[userName].unreadMessages = [];
-      firebase.dbCreateUser(userName);
     }
   }
   else {
@@ -170,8 +157,6 @@ function connectUser(userName, socket) {
   Users[userName].currentRoom = '';
   Users[userName].socketId = socket.id;
   Users[userName].connected = true;
-  firebase.dbResetUserCurRoom(userName);
-  console.log('User', userName, 'connected');
 }
 
 function createRoom(roomId, roomName, userList, isGroup) {
@@ -190,7 +175,6 @@ function createRoom(roomId, roomName, userList, isGroup) {
       roomId: roomId,
       unread: 0
     };
-    firebase.dbCreateRoom(Rooms[roomId]);
   }
   return roomId;
 }
@@ -199,14 +183,12 @@ function changeRoom(data, socket) {
   socket.leave(data.curRoom);
   socket.join(data.toRoom);
   Users[data.user].currentRoom = data.toRoom;
-  firebase.dbChangeRoom(data);
 
   let count = 0;
   let unreadList = Users[data.user].unreadMessages;
   for (let i = 0; i < Users[data.user].unreadMessages.length; i++) {
     if (Rooms[data.toRoom].messageList.indexOf(unreadList[i]) !== -1) {
       unreadList.splice(i, 1);
-      firebase.dbDelUnreadMessage(data.user, i+count);
       i--;
       count++;
     }
@@ -225,7 +207,6 @@ function addContact(data, socket) {
 
         io.to(Users[user].socketId).emit('contact-added', data);
       });
-      firebase.dbUpdateUsersRoomList(data);
     } else {
       socket.emit('contact-not-found', true);
     }
@@ -241,7 +222,6 @@ function addGroup(data, socket) {
 
       io.to(Users[user].socketId).emit('group-added', data);
     });
-    firebase.dbUpdateUsersRoomList(data);
   }
 }
 

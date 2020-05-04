@@ -71,8 +71,7 @@ export class HomePageComponent implements OnInit, AfterViewChecked {
 
     this.chatService.getMessages()
       .subscribe((message: Message) => {
-        console.log('new-massage:', message);
-        let idx = this.getRoomIdxByRoomId(message.toRoom);
+        const idx = this.getRoomIdxByRoomId(message.toRoom);
         this.roomList[idx].messageList.push(message);
         if (this.roomIdx !== idx) {
           this.roomList[idx].unread++;
@@ -102,7 +101,6 @@ export class HomePageComponent implements OnInit, AfterViewChecked {
 
     this.chatService.contactAdded()
       .subscribe((data: Room) => {
-        console.log('contact added', data);
         data.userList.forEach((name) => {
           this.contactBook[name] = '';
         });
@@ -113,7 +111,6 @@ export class HomePageComponent implements OnInit, AfterViewChecked {
 
     this.chatService.groupAdded()
       .subscribe((data: Room) => {
-        console.log('group added', data);
         data.unread = 0;
         this.roomList.push(data);
         this.scrollToBottom();
@@ -135,7 +132,6 @@ export class HomePageComponent implements OnInit, AfterViewChecked {
       return;
     }
     if (this.formMessage.invalid) {
-      console.log('invalid');
       return;
     }
     let msg = this.formMessage.value.message;
